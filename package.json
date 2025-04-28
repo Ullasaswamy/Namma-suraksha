@@ -1,0 +1,18 @@
+{
+  "name": "chatapp-enhanced",
+  "version": "1.0.0",
+  "description": "Chat application with photo capture, upload, and location sharing",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "ejs": "^3.1.8",  
+    "express": "^4.18.2", 
+    "multer": "^1.4.5-lts.1", 
+    "socket.io": "^4.5.4" 
+  },
+  "author": "",
+  "license": "ISC"
+}

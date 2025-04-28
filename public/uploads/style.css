@@ -1,0 +1,255 @@
+/* public/style.css */
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Open Sans', sans-serif;
+  display: grid;
+  place-items: center;
+  background-color: #ebebeb;
+  padding-bottom: 40px; /* Add padding at bottom */
+}
+
+.title {
+  margin: 20px 0;
+  color: #333;
+}
+
+.main {
+  width: 95%; /* Responsive width */
+  max-width: 500px; /* Max width */
+  border: 8px solid #dddddd;
+  border-radius: 24px;
+  overflow: hidden;
+  background-color: #f6f6f6; /* Background for the whole chat area */
+  display: flex;
+  flex-direction: column; /* Stack elements vertically */
+}
+
+.name {
+  display: flex;
+  align-items: center; /* Vertically center items */
+  font-size: 20px; /* Adjusted size */
+  font-weight: 700;
+  padding: 8px 16px;
+  color: #7e7e7e;
+  background-color: #ebebeb;
+  border-bottom: 2px solid #ddd; /* Separator line */
+}
+
+.name > span {
+  color: #aaa; /* Adjusted color */
+  margin-right: 8px; /* Spacing */
+}
+
+.name-input {
+  font-size: 20px; /* Match container */
+  font-weight: 700;
+  color: #555; /* Darker color */
+  flex-grow: 1;
+  border: none;
+  margin: 0px 8px;
+  outline: none;
+  background-color: transparent; /* Inherit background */
+}
+
+.message-container {
+  display: flex;
+  flex-direction: column;
+  background-color: #f6f6f6;
+  width: 100%; /* Full width within .main */
+  height: 60vh; /* Fixed height, adjust as needed */
+  max-height: 700px;
+  overflow-y: scroll;
+  overflow-x: hidden;
+  padding: 10px 0; /* Padding top/bottom */
+  scroll-behavior: smooth;
+}
+
+.message-left,
+.message-right {
+  list-style: none;
+  padding: 0 12px; /* Padding left/right */
+  margin: 6px 0; /* Reduced margin */
+  display: flex; /* Use flex for alignment */
+  max-width: 80%; /* Max width of message bubble */
+}
+
+.message-left {
+  justify-content: flex-start; /* Align left */
+}
+
+.message-right {
+   justify-content: flex-end; /* Align right */
+}
+
+/* Inner p holds the bubble style */
+.message-left .message {
+  border-radius: 15px 15px 15px 0px; /* Adjusted */
+  background-color: #fff;
+  box-shadow: -1px 1px 2px #dcdcdc; /* Adjusted */
+  text-align: left;
+}
+
+.message-right .message {
+  border-radius: 15px 15px 0px 15px; /* Adjusted */
+  background-color: #3a3a3a; /* Darker background */
+  box-shadow: 1px 1px 2px #dcdcdc; /* Adjusted */
+  color: #f1f1f1; /* Lighter text */
+  text-align: left;
+}
+
+.message { /* Common bubble styling */
+  padding: 10px 14px; /* Adjusted padding */
+  font-size: 16px; /* Adjusted size */
+  word-wrap: break-word;
+  display: inline-block; /* Fit content */
+}
+
+.message img {
+  display: block;
+  max-width: 100%; /* Fit image in bubble */
+  height: auto;
+  border-radius: 8px;
+  margin-top: 5px;
+  cursor: pointer;
+}
+
+.message a { /* Style for location links */
+    color: #007bff; /* Example link color */
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 5px;
+    font-weight: bold;
+}
+.message a:hover {
+    text-decoration: underline;
+}
+/* Specific color for links in dark bubbles */
+.message-right .message a {
+    color: #87ceeb; /* Light blue */
+}
+
+
+.message span.message-meta { /* Meta text (name/time) */
+  display: block;
+  font-style: italic;
+  font-size: 11px; /* Smaller meta text */
+  margin-top: 5px;
+  color: #888; /* Grey color */
+  text-align: right;
+}
+.message-right .message span.message-meta {
+    color: #bbb; /* Lighter grey for dark bubbles */
+}
+
+
+.message-feedback { /* Typing feedback */
+  list-style: none;
+  padding: 5px 16px;
+  margin: 0;
+}
+.feedback {
+  font-style: italic;
+  font-size: 13px;
+  color: #555; /* Adjusted color */
+  text-align: center;
+  width: 100%;
+}
+
+.message-form {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; /* Align items vertically */
+  width: 100%;
+  background-color: #e0e0e0; /* Form background */
+  border-top: 2px solid #ccc; /* Separator line */
+  padding: 5px; /* Padding around form */
+}
+
+.message-input {
+  flex-grow: 1;
+  height: 40px; /* Adjusted height */
+  font-size: 15px; /* Adjusted size */
+  border: 1px solid #ccc; /* Add border */
+  border-radius: 20px; /* Rounded input */
+  outline: none;
+  padding: 0 15px; /* Input padding */
+  background-color: #fff;
+  margin: 0 5px; /* Margin */
+}
+
+.action-button,
+.send-button {
+  height: 40px;
+  font-size: 16px;
+  border: none;
+  padding: 0px 12px; /* Button padding */
+  outline: none;
+  background-color: #bbb; /* Button background */
+  color: #333; /* Button text color */
+  cursor: pointer;
+  border-radius: 50%; /* Circular buttons */
+  margin: 0 3px; /* Spacing */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.action-button i, .send-button i {
+    font-size: 1.1em; /* Icon size */
+}
+
+.send-button {
+  background-color: #007bff; /* Send button color */
+  color: white;
+  border-radius: 20px; /* Less round send button */
+  padding: 0 15px;
+}
+.send-button span {
+    margin-left: 5px; /* Space text and icon */
+}
+
+
+.action-button:hover,
+.send-button:hover {
+  opacity: 0.8; /* Hover effect */
+}
+
+.v-divider {
+  height: 30px; /* Shorter divider */
+  width: 1px; /* Thinner */
+  background-color: #ccc; /* Divider color */
+  margin: 0 5px; /* Spacing */
+}
+
+.clients-total {
+  margin: 15px 0; /* Adjusted margin */
+  color: #7e7e7e;
+  font-size: 0.9em; /* Smaller text */
+}
+
+/* Style for hidden camera section */
+#camera-section {
+    /* Positioned via inline style in HTML for fixed centering */
+    text-align: center;
+}
+#camera-section h4 {
+    margin-bottom: 15px;
+    color: #333;
+}
+#camera-section .btn {
+    padding: 8px 15px;
+    margin: 10px 5px 0 5px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+#camera-section .btn { background-color: #dc3545; color: white; }
+#camera-section .cancel-btn { background-color: #6c757d; color: white; }
+#camera-section .btn:hover { opacity: 0.8; }

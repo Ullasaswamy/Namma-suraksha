@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat - iChat</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <h1>iChat 💬</h1>
+    <p id="client-total" style="text-align: center; padding: 5px; background-color: #eee;">Online: 0</p>
+
+    <div class="chat-container" style="height: 70vh; display: flex; flex-direction: column; border: 1px solid #ccc; margin: 0 10px; background: white;">
+        <ul id="message-container" style="list-style-type: none; padding: 10px; margin: 0; overflow-y: auto; flex-grow: 1;">
+        </ul>
+        <div id="feedback" style="min-height: 20px; padding: 0 10px; font-style: italic; color: #888;"></div>
+    </div>
+
+    <form id="message-form" class="message-form" style="display: flex; padding: 10px; background-color: #f0f0f0; gap: 5px;">
+        <input type="text" id="name-input" placeholder="Your Name" required style="padding: 8px; border: 1px solid #ccc; border-radius: 4px; width: 120px;"/>
+        <input type="text" id="message-input" placeholder="Type a message..." style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
+        <button type="submit" class="btn send-btn" style="padding: 8px 12px; cursor: pointer; background-color: #28a745; color: white; border: none; border-radius: 4px;">Send</button>
+        <button type="button" id="captureBtn" class="btn photo-btn" style="padding: 8px 12px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 4px;">📸</button> 
+        <button type="button" id="uploadBtn" class="btn photo-btn" style="padding: 8px 12px; cursor: pointer; background-color: #17a2b8; color: white; border: none; border-radius: 4px;">📤</button> 
+        <button type="button" id="locationBtn" class="btn location-btn" style="padding: 8px 12px; cursor: pointer; background-color: #ffc107; color: black; border: none; border-radius: 4px;">📍</button> 
+    </form>
+
+    <form id="uploadForm" method="POST" enctype="multipart/form-data" style="display:none;">
+        <input type="file" name="snap" id="uploadFile" accept="image/*">
+    </form>
+
+    <div id="camera-section" style="display:none; margin-top: 10px; padding: 10px; border: 1px solid #ddd; text-align: center; background: #f9f9f9;">
+        <video id="video" width="320" height="240" autoplay style="border:1px solid #ccc; display: block; margin: auto;"></video>
+        <br/>
+        <button id="takePictureBtn" class="btn" style="padding: 8px 12px; cursor: pointer; background-color: #dc3545; color: white; border: none; border-radius: 4px; margin: 5px;">📸 Take Picture</button>
+        <button id="cancelCaptureBtn" class="btn" style="padding: 8px 12px; cursor: pointer; background-color: #6c757d; color: white; border: none; border-radius: 4px; margin: 5px;">❌ Cancel</button>
+        <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+        <form id="captureForm" style="display:none;">
+            <input type="hidden" name="image" id="imageInput">
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script> 
+    <script src="/main.js"></script>
+
+    <script>
+      const socket = io();  // connect to socket.io server
+
+      const messageContainer = document.getElementById('message-container');
+      const nameInput = document.getElementById('name-input');
+      const messageInput = document.getElementById('message-input');
+      const messageForm = document.getElementById('message-form');
+
+      messageForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        sendMessage();
+      });
+
+      function sendMessage() {
+        const name = nameInput.value.trim();
+        const message = messageInput.value.trim();
+
+        if (name === '' || message === '') {
+          alert('Name and message are required!');
+          return;
+        }
+
+        const data = {
+          name: name,
+          message: message,
+          dateTime: new Date()
+        };
+
+        socket.emit('message', data);
+        addMessageToUI(true, data);
+        messageInput.value = '';
+      }
+
+      socket.on('chat-message', (data) => {
+        addMessageToUI(false, data);
+      });
+
+      socket.on('clients-total', (count) => {
+        document.getElementById('client-total').innerText = `Online: ${count}`;
+      });
+
+      function addMessageToUI(isOwnMessage, data) {
+        const element = document.createElement('li');
+        element.style.marginBottom = '10px';
+
+        if (data.imageUrl) {
+          // Show image if it's an image message
+          element.innerHTML = `
+            <p style="background: ${isOwnMessage ? '#dcf8c6' : '#fff'}; padding: 10px; border-radius: 8px; max-width: 60%; ${isOwnMessage ? 'margin-left:auto;' : 'margin-right:auto;'}">
+              <strong>${data.name}</strong>: <img src="${data.imageUrl}" alt="Uploaded Image" style="max-width: 100%; height: auto; border-radius: 8px;"/>
+              <br><small>${moment(data.dateTime).fromNow()}</small>
+            </p>
+          `;
+        } else {
+          // Show text message
+          element.innerHTML = `
+            <p style="background: ${isOwnMessage ? '#dcf8c6' : '#fff'}; padding: 10px; border-radius: 8px; max-width: 60%; ${isOwnMessage ? 'margin-left:auto;' : 'margin-right:auto;'}">
+              <strong>${data.name}</strong>: ${data.message}
+              <br><small>${moment(data.dateTime).fromNow()}</small>
+            </p>
+          `;
+        }
+
+        messageContainer.appendChild(element);
+        messageContainer.scrollTop = messageContainer.scrollHeight;
+      }
+
+      // --- Capture Button ---
+      document.querySelector("#captureBtn").addEventListener("click", () => {
+        window.location.href = '/capture';          
+      });
+
+      // --- Upload Button ---
+      document.addEventListener('DOMContentLoaded', () => {
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadInput = document.getElementById('uploadFile');
+
+        uploadBtn.addEventListener('click', () => {
+          if (uploadInput) {
+            uploadInput.click();
+          } else {
+            console.error('Upload input not found');
+          }
+        });
+
+        uploadInput.addEventListener('change', async (event) => {
+          const file = event.target.files[0];
+          if (!file) {
+            alert('No file selected');
+            return;
+          }
+
+          const formData = new FormData();
+          formData.append('snap', file);
+
+          try {
+            const res = await fetch('/upload', {
+              method: 'POST',
+              body: formData,
+            });
+            const data = await res.json();
+            console.log('Uploaded:', data.imageUrl);
+            // Emit the image URL to all users
+            socket.emit('message', {
+              name: nameInput.value,
+              imageUrl: data.imageUrl,
+              dateTime: new Date()
+            });
+          } catch (err) {
+            console.error('Upload error', err);
+          }
+        });
+      });
+
+      // --- Location Button ---
+      document.querySelector("#locationBtn").addEventListener("click", () => {
+        window.location.href = '/Map';
+      });
+    </script>
+</body>
+</html>

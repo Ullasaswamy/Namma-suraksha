@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Capture or Upload Snap</title>
+  <link rel="stylesheet" href="/style.css"> </head>
+<body>
+  <div class="container">
+    <h1>Send a Snap</h1>
+    <p>Capture a photo first, then you'll be taken to the chat.</p>
+    <div class="options">
+      <button onclick="captureSnap()">📸 Capture Live Snap</button>
+    </div>
+
+    <form id="uploadForm" action="/upload" method="POST" enctype="multipart/form-data" style="display:none;">
+      <input type="file" name="snap" accept="image/*" onchange="this.form.submit()">
+    </form>
+
+    <div id="camera" style="display:none; margin-top:20px; text-align:center;">
+      <video id="video" width="320" height="240" autoplay style="border:1px solid #ccc;"></video>
+      <br/>
+      <button onclick="takePicture()" style="padding:10px 15px; margin-top:10px; cursor:pointer;">📸 Take Picture & Go to Chat</button>
+      <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+      <form id="captureForm" action="/captureSnap" method="POST">
+        <input type="hidden" name="image" id="imageInput">
+        </form>
+    </div>
+  </div>
+
+  <script>
+     function captureSnap() {
+      document.getElementById('camera').style.display = 'block';
+      const video = document.getElementById('video');
+      navigator.mediaDevices.getUserMedia({ video: true })
+        .then((stream) => {
+          video.srcObject = stream;
+          // video.play(); // Often needed for Safari/iOS
+        })
+        .catch((err) => {
+          console.error("Error accessing camera: ", err);
+          alert("Could not access camera. Please check permissions.");
+        });
+    }
+    async function takePicture() {
+    const canvas = document.getElementById('canvas');
+    const video = document.getElementById('video');
+    const context = canvas.getContext('2d');
+
+    if (video.readyState >= video.HAVE_METADATA) {
+        context.drawImage(video, 0, 0, 320, 240);
+        const imageData = canvas.toDataURL('image/png');
+
+        // Stop camera stream
+        if (video.srcObject) {
+            video.srcObject.getTracks().forEach(track => track.stop());
+        }
+
+        try {
+            const response = await fetch('/captureSnap', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ image: imageData }),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                alert('📸 Photo sent successfully!');
+                window.location.href = result.redirectUrl; // Go to /chat
+            } else {
+                alert('❌ Failed to send photo.');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('❌ Error sending photo.');
+        }
+    } else {
+        alert("Camera not ready yet. Please wait a moment.");
+    }
+
+    
+}
+
+  </script>
+</body>
+</html>

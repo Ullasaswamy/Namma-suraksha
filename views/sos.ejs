@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SOS</title>
+  <link rel="stylesheet" href="/style.css"> <style> /* Basic styling for centering */
+        body { display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; }
+        #sosButton { padding: 15px 30px; font-size: 1.2em; cursor: pointer; background-color: red; color: white; border: none; border-radius: 8px; }
+    </style>
+</head>
+<body>
+  <h1>SOS</h1>
+  <button id="sosButton">🚨 Send SOS & Capture Photo 🚨</button>
+
+  <script>
+    const sosButton = document.getElementById('sosButton');
+
+    sosButton.addEventListener('click', () => {
+      window.location.href = '/chat';  // Redirect to capture page
+    });
+  </script>
+</body>
+</html>

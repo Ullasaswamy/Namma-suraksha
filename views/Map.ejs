@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GeoChat 🌍</title>
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+  <script src="/socket.io/socket.io.js"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+      text-align: center;
+    }
+    .geo-btn, .location-btn {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px;
+    }
+    .showdet {
+      margin: 10px 0;
+      font-weight: bold;
+      font-size: 18px;
+    }
+    #map {
+      height: 500px;
+      width: 100%;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>🌎 Real-time Location Sharing</h1>
+
+  <button type="button" id="locationBtn" class="location-btn" style="background-color: #ffc107; color: black; border: none; border-radius: 4px;">
+    📍 Share My Location
+  </button>
+
+  <p class="showdet">User Location will appear here</p>
+  <div id="map"></div>
+
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script>
+    const socket = io(); // connect to server
+
+    const show = document.querySelector(".showdet");
+    const map = L.map('map').setView([20.5937, 78.9629], 5); // India center
+    const locationBtn = document.getElementById('locationBtn');
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    let marker, circle, zoomed = false;
+    let watching = false;
+
+    locationBtn.addEventListener('click', () => {
+      if (navigator.geolocation) {
+        if (!watching) {
+          navigator.geolocation.watchPosition(success, error);
+          watching = true;
+        }
+      } else {
+        show.textContent = "Geolocation is not supported.";
+      }
+    });
+
+    function success(pos) {
+      const lat = pos.coords.latitude;
+      const lng = pos.coords.longitude;
+      const accuracy = pos.coords.accuracy;
+
+      if (marker) {
+        map.removeLayer(marker);
+        map.removeLayer(circle);
+      }
+
+      marker = L.marker([lat, lng]).addTo(map);
+      circle = L.circle([lat, lng], { radius: accuracy }).addTo(map);
+
+      if (!zoomed) {
+        map.fitBounds(circle.getBounds());
+        zoomed = true;
+      }
+
+      map.setView([lat, lng]);
+
+      // Reverse Geocode to get Address
+      fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`)
+        .then(response => response.json())
+        .then(data => {
+          const address = data.display_name;
+          show.innerHTML = `
+            Latitude: ${lat.toFixed(5)}, Longitude: ${lng.toFixed(5)}<br>
+            <strong>Address:</strong> ${address}
+          `;
+
+          // 📤 Send location data to server
+          socket.emit('location-share', {
+            latitude: lat,
+            longitude: lng,
+            address: address,
+            timestamp: new Date()
+          });
+
+        })
+        .catch(() => {
+          show.innerHTML = `
+            Latitude: ${lat.toFixed(5)}, Longitude: ${lng.toFixed(5)}<br>
+            <strong>Address:</strong> Unable to fetch address
+          `;
+        });
+    }
+
+    function error(err) {
+      if (err.code === 1) {
+        alert("Please allow geolocation access");
+      } else {
+        alert("Cannot get current location");
+      }
+    }
+
+    // 📥 Listen for other users' locations
+    socket.on('location-received', (data) => {
+      console.log("Received location:", data);
+
+      const { latitude, longitude, address } = data;
+
+      const userMarker = L.marker([latitude, longitude]).addTo(map);
+      userMarker.bindPopup(`<b>📍 User Location</b><br>${address}`).openPopup();
+    });
+
+    navigator.geolocation.getCurrentPosition((position) => {
+    socket.emit('send-location', {
+        name: nameInput.value,
+        latitude: position.coords.latitude,
+        longitude: position.coords.longitude
+    });
+});
+
+  </script>
+
+</body>
+
+</html>

@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat & Location</title>
+  <link rel="stylesheet" href="/style.css"> </head>
+<body>
+  <h1>Choose an Option</h1>
+   <p>(This page is usually bypassed now. You likely arrived here from an older flow.)</p>
+  <div class="options">
+    <button onclick="openChat()">💬 Open Chatbox</button>
+    <button onclick="openLocation()">📍 View Live Location (Placeholder)</button>
+  </div>
+
+  <script>
+    function openChat() {
+      window.location.href = '/chat';  // Redirect to chat page
+    }
+
+    function openLocation() {
+      alert('Live location feature implementation needed here.');
+      // Example: Use Geolocation API
+       if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                alert(`Your Location: ${pos.coords.latitude}, ${pos.coords.longitude}`);
+                // Send this data or display on map etc.
+            }, err => {
+                alert(`Error getting location: ${err.message}`);
+            });
+       } else {
+           alert('Geolocation not available.');
+       }
+    }
+  </script>
+</body>
+</html>
